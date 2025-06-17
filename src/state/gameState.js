@@ -85,5 +85,6 @@ export function gameReducer(state, action) {
       return { ...state, roundType: "normal", tiebreakerPlayers: [] };
     default:
       return state;
+      //Ignore comment
   }
 }
