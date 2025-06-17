@@ -34,6 +34,8 @@ jobs:
           path: docs
 
   deploy:
+    environment:
+      name: github-pages
     needs: build-and-deploy
     runs-on: ubuntu-latest
     permissions:
