@@ -29,7 +29,7 @@ export default function ReaderInputScreen({ state, dispatch }) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-5 flex flex-col gap-4 items-center">
-      <h1 className="text-2xl font-bold">{readerName}, enter your secret number:</h1>
+      <h1 className="text-2xl font-bold">{readerName}, Read the question and enter your guess:</h1>
       <div className="flex gap-2 items-center">
         <button
           onClick={() => setOverride("-INF")}
