@@ -1,5 +1,6 @@
 name: Deploy to GitHub Pages
 
+# Trigger on pushes to main
 on:
   push:
     branches:
@@ -9,21 +10,25 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pages: write
-      id-token: write
+      contents: read       # checkout
+      pages: write         # deploy to Pages
+      id-token: write      # for deploy-pages auth
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm run build
+      - name: Build site
+        run: npm run build
 
-      - name: Upload artifact for GitHub Pages
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: docs
@@ -35,4 +40,5 @@ jobs:
       pages: write
       contents: read
     steps:
-      - uses: actions/deploy-pages@v1
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
