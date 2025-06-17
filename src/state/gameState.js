@@ -1,9 +1,8 @@
 export const initialGameState = {
   phase: "setup",
-  numPlayers: 0,
   targetScore: 4,
   players: [],
-  currentPlayerIndex: 0,
+  currentReaderIdx: null,
   readerNumber: null,
   guesses: [],
   scores: {},
@@ -13,14 +12,23 @@ export const initialGameState = {
 
 export function gameReducer(state, action) {
   switch (action.type) {
-    case "SETUP":
-      return { ...state, numPlayers: action.numPlayers, targetScore: action.targetScore, phase: "nameEntry" };
+    case "SET_TARGET":
+      return { ...state, targetScore: action.targetScore, phase: "nameEntry" };
     case "ADD_PLAYER":
-      const newPlayer = { name: action.name };
-      return { ...state, players: [...state.players, newPlayer], scores: { ...state.scores, [action.name]: 0 } };
-    case "ALL_PLAYERS_ADDED":
-      const firstReader = Math.floor(Math.random() * state.players.length);
-      return { ...state, currentPlayerIndex: firstReader, phase: "readerInput" };
+      if (!action.name.trim()) return state;
+      if (state.players.includes(action.name)) return state;
+      return {
+        ...state,
+        players: [...state.players, action.name],
+        scores: { ...state.scores, [action.name]: 0 }
+      };
+    case "REORDER_PLAYERS":
+      return { ...state, players: action.players };
+    case "START_ROUND":
+      const startIdx = state.currentReaderIdx === null
+        ? Math.floor(Math.random() * state.players.length)
+        : state.currentReaderIdx;
+      return { ...state, currentReaderIdx: startIdx, phase: "readerInput" };
     case "SET_READER_NUMBER":
       return { ...state, readerNumber: action.readerNumber, guesses: [], phase: "guessing" };
     case "ADD_GUESS":
@@ -36,13 +44,21 @@ export function gameReducer(state, action) {
         const updated = { ...state.scores };
         updated[tied[0]] += 1;
         const hasWon = updated[tied[0]] >= state.targetScore;
-        return hasWon ? { ...state, scores: updated, phase: "victory" } : { ...state, scores: updated, phase: "nextRound" };
+        return hasWon
+          ? { ...state, scores: updated, phase: "victory" }
+          : { ...state, scores: updated, phase: "nextRound" };
       } else {
         return { ...state, tiebreakerPlayers: tied, roundType: "tiebreaker", phase: "nextRound" };
       }
     case "NEXT_ROUND":
-      const next = (state.currentPlayerIndex + 1) % state.players.length;
-      return { ...state, currentPlayerIndex: next, readerNumber: null, guesses: [], phase: "readerInput" };
+      const next = (state.currentReaderIdx + 1) % state.players.length;
+      return {
+        ...state,
+        currentReaderIdx: next,
+        readerNumber: null,
+        guesses: [],
+        phase: "readerInput"
+      };
     case "RESET_TO_NORMAL":
       return { ...state, roundType: "normal", tiebreakerPlayers: [] };
     default:
